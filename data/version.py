@@ -1,3 +1,13 @@
+__version__ = "0.9.3.6"
+
+"""
+Changelog for version 0.9.3.6 (2025-04-30):
+
+Support for Beatport search and metadata
+
+**Full Changelog**: https://github.com/asuna42/smoked-salmon/compare/0.9.3.5...0.9.3.6
+"""
+
 __version__ = "0.9.3.5"
 
 """
