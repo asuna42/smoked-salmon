@@ -151,7 +151,8 @@ def _extract_remixers_from_title(title):
     match = re.search(r"\((.*?)\s+(Club Mix|Radio Mix|Remix|Mix)\)", title, re.IGNORECASE)
     if match:
         remixer = match.group(1).strip()
-        return [(remixer, "remixer")]
+        if remixer.lower() not in ["extended"]:
+            return [(remixer, "remixer")]
     return []
 
 
