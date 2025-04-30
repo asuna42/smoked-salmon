@@ -47,22 +47,22 @@ class BaseScraper:
             )
         return cls.site_url + cls.release_format.format(rls_id=rls_id)
 
-    async def get_json(self, url, params=None, headers=None):
+    async def get_json(self, url, params=None, headers=None, full_url=False):
         """
         Run an asynchronius GET request to a JSON API maintained by
         a metadata source.
         """
         return await loop.run_in_executor(
-            None, lambda: self.get_json_sync(url, params, headers)
+            None, lambda: self.get_json_sync(url, params, headers, full_url)
         )
 
-    def get_json_sync(self, url, params=None, headers=None):
+    def get_json_sync(self, url, params=None, headers=None, full_url=False):
         """Make a synchronius get request, usually called by the async get_json."""
         params = {**(params or {}), **(self.get_params)}
         headers = {**(headers or {}), **HEADERS}
         try:
             result = requests.get(
-                self.url + url, params=params, headers=headers, timeout=10
+                (self.url if full_url is False else "") + url, params=params, headers=headers, timeout=10
             )
             if result.status_code != 200:
                 class_hierarchy = ' -> '.join([cls.__name__ for cls in self.__class__.mro()[:-1]])
