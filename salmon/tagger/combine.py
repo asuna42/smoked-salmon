@@ -45,6 +45,11 @@ def combine_metadatas(*metadatas, base=None, source_url=None):  # noqa: C901
     if base and base.get("url", False):
         url_sources.add(get_source_from_link(base["url"]))
 
+    extract_remixers_from_title = True
+    if len(metadatas) == 1 and metadatas[0][0] == "Beatport":
+        # Beatport metadata is reliable for remixers
+        extract_remixers_from_title = False
+
     sources = sort_metadatas(metadatas)
 
     source = get_source_from_link(source_url)
@@ -69,7 +74,8 @@ def combine_metadatas(*metadatas, base=None, source_url=None):  # noqa: C901
                 base["tracks"] = combine_tracks(
                     base["tracks"],
                     metadata["tracks"],
-                    from_preferred_source
+                    from_preferred_source,
+                    extract_remixers_from_title=extract_remixers_from_title,
                 )
 
             if (
@@ -149,7 +155,7 @@ def _extract_remixers_from_title(title):
     return []
 
 
-def combine_tracks(base, meta, update_track_numbers):
+def combine_tracks(base, meta, update_track_numbers, extract_remixers_from_title=True):
     """Combine the metadata for the tracks of two different sources."""
     btracks = iter(chain.from_iterable([list(d.values()) for d in base.values()]))
     for disc, tracks in meta.items():
@@ -185,10 +191,11 @@ def combine_tracks(base, meta, update_track_numbers):
             for a in track["artists"]:
                 if (re_strip(a[0]), a[1]) not in base_artists:
                     btrack["artists"].append(a)
-            remixers = _extract_remixers_from_title(track["title"])
-            for remixer in remixers:
-                if (re_strip(remixer[0]), remixer[1]) not in base_artists:
-                    btrack["artists"].append(remixer)
+            if extract_remixers_from_title:
+                remixers = _extract_remixers_from_title(track["title"])
+                for remixer in remixers:
+                    if (re_strip(remixer[0]), remixer[1]) not in base_artists:
+                        btrack["artists"].append(remixer)
             btrack["artists"] = check_for_artist_fragments(btrack["artists"])
 
             if track["explicit"]:
