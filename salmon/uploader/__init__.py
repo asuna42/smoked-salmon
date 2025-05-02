@@ -153,6 +153,12 @@ loop = asyncio.get_event_loop()
     help='For WEB uploads provide the source of the album to be added in release description'
 )
 @click.option(
+    "--skip-search",
+    "-ss",
+    is_flag=True,
+    help="Skip searching for releases and fetch metadata from --source-url",
+)
+@click.option(
     "-yyy",
     is_flag=True,
     help='Automatically pick the default answer for prompt'
@@ -182,6 +188,7 @@ def up(
     source_url,
     yyy,
     skip_mqa,
+    skip_search,
 ):
     """Command to upload an album folder to a Gazelle Site."""
     if yyy:
@@ -221,6 +228,7 @@ def up(
         auto_rename=auto_rename,
         skip_up=skip_up,
         skip_mqa=skip_mqa,
+        skip_search=skip_search,
     )
 
 
@@ -244,6 +252,7 @@ def upload(
     auto_rename=False,
     skip_up=False,
     skip_mqa=False,
+    skip_search=False,
 ):
     """Upload an album folder to Gazelle Site
     Offer the choice to upload to another tracker after completion."""
@@ -300,7 +309,11 @@ def upload(
                 path, audio_info, lossy, spectrals, format=rls_data["format"]
             )
 
-        metadata, new_source_url = get_metadata(path, tags, rls_data)
+        if skip_search and source_url is None:
+            skip_search = False
+            click.secho("Not skipping search because no source url provided", fg="yellow")
+
+        metadata, new_source_url = get_metadata(path, tags, rls_data, source_url if skip_search else None)
         if new_source_url is not None:
             source_url = new_source_url
             click.secho(f"New Source URL: {source_url}", fg="yellow")

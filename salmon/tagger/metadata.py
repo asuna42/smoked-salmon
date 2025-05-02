@@ -15,23 +15,26 @@ from salmon.tagger.sources.base import generate_artists
 loop = asyncio.get_event_loop()
 
 
-def get_metadata(path, tags, rls_data=None):
+def get_metadata(path, tags, rls_data=None, source_url=None):
     """
     Get metadata pertaining to a release from various metadata sources. Have the user
     decide which sources to use, and then combine their information.
     """
     click.secho("\nChecking metadata...", fg="cyan", bold=True)
-    searchstrs = make_searchstrs(rls_data["artists"], rls_data["title"])
-    click.secho(f"Searching for '{searchstrs}' releases...")
-    kwargs = (
-        dict(artists=[a for a, _ in rls_data["artists"]], album=rls_data["title"])
-        if rls_data
-        else {}
-    )
-    search_results = run_metasearch(
-        searchstrs, filter=False, track_count=len(tags), **kwargs
-    )
-    choices = _print_search_results(search_results, rls_data)
+    if source_url:
+        choices = [source_url]
+    else:
+        searchstrs = make_searchstrs(rls_data["artists"], rls_data["title"])
+        click.secho(f"Searching for '{searchstrs}' releases...")
+        kwargs = (
+            dict(artists=[a for a, _ in rls_data["artists"]], album=rls_data["title"])
+            if rls_data
+            else {}
+        )
+        search_results = run_metasearch(
+            searchstrs, filter=False, track_count=len(tags), **kwargs
+        )
+        choices = _print_search_results(search_results, rls_data)
     metadata, source_url = _select_choice(choices, rls_data)
     remove_various_artists(metadata["tracks"])
     return metadata, source_url
@@ -85,14 +88,17 @@ def _select_choice(choices, rls_data):
     """
     while True:
         if choices:
-            res = click.prompt(
-                click.style(
-                    "\nWhich metadata results would you like to use? Other "
-                    "options: paste URLs, [m]anual, [a], prefix choice or URL with \"*\" to indicate source (WEB)",
-                    fg="magenta"
-                ),
-                type=click.STRING,
-            )
+            if len(choices) == 1 and choices[0].startswith("http"):
+                res = choices[0]
+            else:
+                res = click.prompt(
+                    click.style(
+                        "\nWhich metadata results would you like to use? Other "
+                        "options: paste URLs, [m]anual, [a], prefix choice or URL with \"*\" to indicate source (WEB)",
+                        fg="magenta"
+                    ),
+                    type=click.STRING,
+                )
         else:
             res = click.prompt(
                 click.style(
