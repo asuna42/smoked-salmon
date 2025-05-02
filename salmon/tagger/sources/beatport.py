@@ -142,7 +142,7 @@ class Scraper(BeatportBase, MetadataMixin):
         tracks = defaultdict(dict)
         cur_disc = 1
 
-        for track_num, track in enumerate(soup["tracks"]):
+        for track_num, track in enumerate(soup["tracks"], start=1):
             try:
                 tracks[str(cur_disc)][track_num] = self.generate_track(
                     trackno=track_num,
