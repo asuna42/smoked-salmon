@@ -11,7 +11,7 @@ from salmon.sources.tidal import TidalBase
 
 SOURCE_ICONS = {
     "Bandcamp": "https://ptpimg.me/91oo89.png",
-    "Beatport": "https://ptpimg.me/5hwjpv.png",
+    "Beatport": "https://ptpimg.me/58ls49.png",
     "Deezer": "https://ptpimg.me/m265v2.png",
     "Discogs": "https://ptpimg.me/13y32k.png",
     "iTunes": "https://ptpimg.me/0z2x90.png",
